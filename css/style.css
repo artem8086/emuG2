@@ -1,0 +1,204 @@
+* {
+    box-sizing: border-box;
+    font-size: 2.5vw;
+}
+
+
+.controls * {
+    font-size: 2.3vw;
+}
+
+@media only screen and (max-device-width: 480px) {
+    * {
+        font-size: 6vw;
+    }
+
+    .controls * {
+        font-size: 5.8vw;
+    }
+}
+
+table {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    cursor: default;
+    border-color: #000;
+    border-style: solid;
+    border-width: 2px;
+    table-layout: fixed;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+tbody tr:hover {
+    background-color: #CCC;
+}
+
+.select-line {
+    background-color: #77F;
+}
+
+.select-line:hover {
+    background-color: #44C;
+}
+
+.error {
+    background-color: #ff0000;
+}
+
+tr.run-line {
+    background-color: #33ff33;
+}
+
+td {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    cursor: default;
+    margin: 0px;
+    text-align: center;
+    border-color: #000;
+    border-width: 1px;
+    border-top: 2px solid #DDD;
+}
+
+table input[type="text"] {
+    text-align: center;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+.clearfix:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.dat {
+    border-left-color: #333;
+    border-left-style: solid;
+}
+
+.main-container {
+    display: inline-block;
+    float: left;
+    margin: 3%;
+}
+
+.content-tabs {
+    display: flex;
+    float: bottom;
+}
+
+.content {
+    display: inline-block;
+    border-color: #000;
+    margin: 0px;
+    padding: 5%;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.tab {
+    color: #000 !important;
+    text-decoration:none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    float: left;
+    text-align: center;
+    padding: 3%;
+    border-color: #000;
+    border-style: solid;
+    border-width: 2px;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    border-bottom-width: 0px;
+    background-color: #FFF;
+    margin-top: 1%;
+}
+
+.base-addr {
+    background-color: bisque;
+}
+
+.tab:hover {
+    background-color: #AAA;
+    cursor: pointer;
+}
+
+.select-tab {
+    padding-top: 4%;
+    margin-top: 0%;
+    background-color: cornsilk;
+}
+
+.observer {
+    display: none;
+    top: 0px;
+    left: 0px;
+    height: 60vw;
+    overflow: auto;
+    border-style: dashed;
+    border-color: #400;
+    border-width: 1px;
+}
+
+#command-observer {
+    display: inline-block;
+}
+
+.controls {
+    display: inline-block;
+    margin: 3%;
+    padding: 4px;
+}
+
+.controls p {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.controls div {
+    padding: 2px;
+}
+
+.registers input[type="text"] {
+    width: 20%;
+}
+
+table.regs-table th {
+    padding: 4px;
+    text-align: right;
+}
+
+table.regs-table td {
+    border-top-style: none;
+
+}
+
+table.regs-table input[type="text"] {
+    text-align: left;
+    width: 100%;
+}
+
+div.block-view {
+    display: block;
+    padding: 3%;
+    border-color: #000000;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 10px;
+    margin-bottom: 10%;
+}
+
+#inp-delay {
+    margin-top: 3%;
+    width: 40%;
+}
+
+#load-file {
+    margin-top: 3%
+}

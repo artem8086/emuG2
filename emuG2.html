@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Эмулятор G2</title>
+    <link href="css/style.css" type="text/css" rel="stylesheet" media="all">
+    <script src="js/core.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <div class="content-tabs clearfix">
+            <a id="com-but" class="tab select-tab">Команды</a>
+            <a id="mem-but" class="tab">Память</a>
+        </div>
+        <div class="content">
+            <div class="observer" id="command-observer">
+                <table id="commands-list">
+                    <thead>
+                        <tr>
+                            <th>Addr</th>
+                            <th>Code</th>
+                            <th>Asm</th>
+                            <th>R</th>
+                            <th>B</th>
+                            <th>D</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="observer" id="memory-observer">
+                <table id="memory-list">
+                    <thead>
+                        <tr>
+                            <th>Addr</th>
+                            <th>Bin</th>
+                            <th>Hex</th>
+                            <th>Dec</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="controls">
+        <div class="block-view">
+            <button id="but-run">Запустить</button>
+            <button id="but-pause">Пауза</button>
+            <button id="but-reset">Сброс</button>
+            <button id="but-step">Шаг</button><br />
+            <label for="inp-delay">Задержка: </label>
+            <input type="text" id="inp-delay" value="500"><span> мс</span>
+        </div>
+        <div class="block-view">
+            <table class="regs-table">
+                <caption>Регистры</caption>
+                <tr>
+                    <th>R1:</th>
+                    <td><input type="text" id="reg-R1"></td>
+                </tr>
+                <tr>
+                    <th>R2:</th>
+                    <td><input type="text" id="reg-R2"></td>
+                </tr>
+                <tr>
+                    <th>RS:</th>
+                    <td><input type="text" id="reg-RS"></td>
+                </tr>
+                <tr>
+                    <th>RK:</th>
+                    <td><input type="text" id="reg-RK"></td>
+                </tr>
+                <tr>
+                    <th>RA:</th>
+                    <td><input type="text" id="reg-RA"></td>
+                </tr>
+                <tr>
+                    <th>SAK:</th>
+                    <td><input type="text" id="reg-SAK"></td>
+                </tr>
+            </table>
+            <hr />
+            <table>
+                <caption>Флаги</caption>
+                <thead>
+                    <tr>
+                        <th>S</th>
+                        <th>Z</th>
+                        <th>C</th>
+                        <th>E</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" id="flag-S"></td>
+                        <td><input type="checkbox" id="flag-Z"></td>
+                        <td><input type="checkbox" id="flag-C"></td>
+                        <td><input type="checkbox" id="flag-E"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="block-view">
+            <button id="upload-file">Выгрузить дамп памяти</button><br />
+            <input type="file" id="load-file">
+        </div>
+    </div>
+</body>
+</html>
