@@ -12,7 +12,8 @@
 <body>
     <div class="main-container">
         <div class="content-tabs clearfix">
-            <a id="com-but" class="tab select-tab">Команды</a>
+            <a id="com-but" class="tab select-tab">Программа</a>
+            <a id="base-but" class="tab">База</a>
             <a id="mem-but" class="tab">Память</a>
         </div>
         <div class="content">
@@ -30,6 +31,20 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+            <div class="observer" id="base-observer">
+                <table id="base-list">
+                    <thead>
+                    <tr>
+                        <th>Addr</th>
+                        <th>Bin</th>
+                        <th>Hex</th>
+                        <th>Dec</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <!-- <p>* по 8-у адрессу хранится адресс возврата из подпрограммы</p> -->
             </div>
             <div class="observer" id="memory-observer">
                 <table id="memory-list">

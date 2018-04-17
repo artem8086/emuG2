@@ -58,11 +58,12 @@ function Core() {
         'INC'
     ];
 
-    var oldEdit, table, tableMemory;
+    var oldEdit, table, tableBase, tableMemory;
     function endEdit() {
         if (oldEdit) {
             var addr = oldEdit.parentNode.rowIndex;
-            oldEdit.verifyEdit(oldEdit.innerText = $$('input', oldEdit).value, addr - 1);
+            var offs = oldEdit.parentNode.parentNode.offsetAddr;
+            oldEdit.verifyEdit(oldEdit.innerText = $$('input', oldEdit).value, addr + offs);
             oldEdit.parentNode.classList.remove('select-line');
         }
     }
@@ -94,22 +95,33 @@ function Core() {
     function setMemory(addr, value) {
         value &= 0xFFF;
         self.memory[addr] = value;
+        var cells;
         //
-        var code = value & 0xF;
-        var cells = table.rows[addr].cells;
-        cells[1].textContent = toBinStr(code, 4);
-        cells[2].textContent = COMMAND_ASM[code];
-        cells[3].textContent = (value >> 4) & 1;
-        cells[4].textContent = toBinStr(value >> 5, 3);
-        cells[5].textContent = toBinStr(value >> 8, 4);
-        //
-        cells = tableMemory.rows[addr].cells;
-        cells[1].textContent = toBinStr(value, 12);
-        cells[2].textContent = toHexStr(value, 3);
-        if ((value & 0x800) != 0) {
-            value |= -1 ^ 0xFFF;
+        if (addr < 9 || addr >= 200) {
+            var t;
+            if (addr >= 200) {
+                addr -= 200;
+                t = tableMemory;
+            } else t = tableBase;
+            //
+            cells = t.rows[addr].cells;
+            cells[1].textContent = toBinStr(value, 12);
+            cells[2].textContent = toHexStr(value, 3);
+            if ((value & 0x800) != 0) {
+                value |= -1 ^ 0xFFF;
+            }
+            cells[3].textContent = + value;
+        } else {
+            addr -= 9;
+            var code = value & 0xF;
+            cells = table.rows[addr].cells;
+            cells[1].textContent = toBinStr(code, 4);
+            cells[2].textContent = COMMAND_ASM[code];
+            cells[3].textContent = (value >> 4) & 1;
+            cells[4].textContent = toBinStr(value >> 5, 3);
+            cells[5].textContent = toBinStr(value >> 8, 4);
         }
-        cells[3].textContent = + value;
+
     }
 
     function verifyOpCode(value, addr) {
@@ -185,24 +197,44 @@ function Core() {
 
     this.init = () => {
         table = $$('tbody', $$('#commands-list'));
+        tableBase = $$('tbody', $$('#base-list'));
         tableMemory = $$('tbody', $$('#memory-list'));
+        //
+        table.offsetAddr = 8;
+        tableBase.offsetAddr = -1;
+        tableMemory.offsetAddr = 199;
         self.memory = [];
-        for (var addr = 0; addr < MEMORY_SIZE; addr++) {
-            var row = table.insertRow(addr);
+        //
+        function createCell(index, verifyFunc) {
+            var cell = row.insertCell(index);
+            cell.verifyEdit = (value, addr) => {
+                if (verifyFunc && !verifyFunc(value, addr)) {
+                    cell.classList.add('error');
+                } else {
+                    cell.classList.remove('error');
+                }
+            };
+            cell.classList.add('dat');
+        }
+        //
+        var addr = 0;
+        for (; addr < 9; addr++) {
+            var row = tableBase.insertRow(addr);
+            // Адрес
+            row.insertCell(0).innerText = addr;
+            // Binary
+            createCell(1, verifyBinary);
+            // Hex
+            createCell(2, verifyHex);
+            // Decemical
+            createCell(3, verifyDecemical);
+            setMemory(addr, 0);
+        }
+        //
+        for (; addr < 200; addr++) {
+            var row = table.insertRow(addr - 9);
                 // Адрес
             row.insertCell(0).innerText = addr;
-
-            function createCell(index, verifyFunc) {
-                var cell = row.insertCell(index);
-                cell.verifyEdit = (value, addr) => {
-                    if (verifyFunc && !verifyFunc(value, addr)) {
-                        cell.classList.add('error');
-                    } else {
-                        cell.classList.remove('error');
-                    }
-                };
-                cell.classList.add('dat');
-            }
                 // Код команды
             createCell(1, verifyOpCode);
                 // Мнемоника команды
@@ -213,20 +245,22 @@ function Core() {
             createCell(4, verifyB);
                 // D
             createCell(5, verifyD);
-            //
-            row = tableMemory.insertRow(addr);
+        }
+        //
+        for (; addr < MEMORY_SIZE; addr++) {
+            row = tableMemory.insertRow(addr - 200);
             row.insertCell(0).innerText = addr;
-                // Binary
+            // Binary
             createCell(1, verifyBinary);
-                // Hex
+            // Hex
             createCell(2, verifyHex);
-                // Decemical
+            // Decemical
             createCell(3, verifyDecemical);
             setMemory(addr, 0);
         }
+        //
         for (var i = 0; i < 8; i++) {
-            table.rows[i].classList.add('base-addr');
-            tableMemory.rows[i].classList.add('base-addr');
+            tableBase.rows[i].classList.add('base-addr');
         }
         table.addEventListener('mousedown', selectEdit);
         tableMemory.addEventListener('mousedown', selectEdit);
@@ -266,10 +300,15 @@ function Core() {
         var oldAddr;
         self.regs.SAK.set = function (value) {
             value &= 0xFF;
-            if (oldAddr) table.rows[oldAddr].classList.remove('run-line');
-            oldAddr = value;
-            table.rows[value].classList.add('run-line');
             baseSettter.call(this, value);
+            if (oldAddr) table.rows[oldAddr].classList.remove('run-line');
+            if (value >= 9 && value < 200) {
+                value -= 9;
+                oldAddr = value;
+                table.rows[value].classList.add('run-line');
+            } else {
+                oldAddr = null;
+            }
         };
         self.regs.SAK.addEventListener('change', (e) => {
             var addr = e.target.get();
@@ -444,13 +483,25 @@ window.addEventListener("load", () => {
     $$('#com-but').addEventListener('click', (e) => {
         e.target.classList.add('select-tab');
         $$('#mem-but').classList.remove('select-tab');
+        $$('#base-but').classList.remove('select-tab');
         $$('#command-observer').style.display = 'inline-block';
+        $$('#base-observer').style.display = 'none';
+        $$('#memory-observer').style.display = 'none';
+    });
+    $$('#base-but').addEventListener('click', (e) => {
+        e.target.classList.add('select-tab');
+        $$('#mem-but').classList.remove('select-tab');
+        $$('#com-but').classList.remove('select-tab');
+        $$('#command-observer').style.display = 'none';
+        $$('#base-observer').style.display = 'inline-block';
         $$('#memory-observer').style.display = 'none';
     });
     $$('#mem-but').addEventListener('click', (e) => {
         e.target.classList.add('select-tab');
         $$('#com-but').classList.remove('select-tab');
+        $$('#base-but').classList.remove('select-tab');
         $$('#command-observer').style.display = 'none';
+        $$('#base-observer').style.display = 'none';
         $$('#memory-observer').style.display = 'inline-block';
     });
     core = new Core();
