@@ -63,6 +63,7 @@ function Core() {
         if (oldEdit) {
             var addr = oldEdit.parentNode.rowIndex;
             var offs = oldEdit.parentNode.parentNode.offsetAddr;
+			console.log(addr + offs);
             oldEdit.verifyEdit(oldEdit.innerText = $$('input', oldEdit).value, addr + offs);
             oldEdit.parentNode.classList.remove('select-line');
         }
@@ -245,6 +246,7 @@ function Core() {
             createCell(4, verifyB);
                 // D
             createCell(5, verifyD);
+			setMemory(addr, 0);
         }
         //
         for (; addr < MEMORY_SIZE; addr++) {
@@ -263,6 +265,7 @@ function Core() {
             tableBase.rows[i].classList.add('base-addr');
         }
         table.addEventListener('mousedown', selectEdit);
+		tableBase.addEventListener('mousedown', selectEdit);
         tableMemory.addEventListener('mousedown', selectEdit);
         //
         self.regs = {
@@ -297,11 +300,11 @@ function Core() {
         self.regs.SAK = $$('#reg-SAK')
         var baseSettter = self.regs.R1.set;
         self.regs.SAK.get = self.regs.R1.get;
-        var oldAddr;
+        var oldAddr = null;
         self.regs.SAK.set = function (value) {
             value &= 0xFF;
             baseSettter.call(this, value);
-            if (oldAddr) table.rows[oldAddr].classList.remove('run-line');
+            if (oldAddr != null) table.rows[oldAddr].classList.remove('run-line');
             if (value >= 9 && value < 200) {
                 value -= 9;
                 oldAddr = value;

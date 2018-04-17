@@ -109,7 +109,7 @@ table input[type="text"] {
     user-select: none;
     float: left;
     text-align: center;
-    padding: 3%;
+    padding: 10px;
     border-color: #000;
     border-style: solid;
     border-width: 2px;
@@ -137,6 +137,7 @@ table input[type="text"] {
 
 .observer {
     display: none;
+	width: 35vw;
     top: 0px;
     left: 0px;
     height: 60vw;
@@ -186,6 +187,7 @@ table.regs-table input[type="text"] {
 
 div.block-view {
     display: block;
+	width: 40vw;
     padding: 3%;
     border-color: #000000;
     border-width: 2px;
