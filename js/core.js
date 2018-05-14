@@ -2,6 +2,7 @@
  * Mini JQuery
  */
 function $$(selector, node) {
+    'use strict'
     return (node || document).querySelector(selector);
 }
 
@@ -63,8 +64,7 @@ function Core() {
         if (oldEdit) {
             var addr = oldEdit.parentNode.rowIndex;
             var offs = oldEdit.parentNode.parentNode.offsetAddr;
-			console.log(addr + offs);
-            oldEdit.verifyEdit(oldEdit.innerText = $$('input', oldEdit).value, addr + offs);
+			oldEdit.verifyEdit(oldEdit.innerText = $$('input', oldEdit).value, addr + offs);
             oldEdit.parentNode.classList.remove('select-line');
         }
     }
@@ -96,6 +96,7 @@ function Core() {
     function setMemory(addr, value) {
         value &= 0xFFF;
         self.memory[addr] = value;
+        self.regs.RS.set(addr);
         var cells;
         //
         if (addr < 9 || addr >= 200) {
@@ -197,77 +198,7 @@ function Core() {
     };
 
     this.init = () => {
-        table = $$('tbody', $$('#commands-list'));
-        tableBase = $$('tbody', $$('#base-list'));
-        tableMemory = $$('tbody', $$('#memory-list'));
-        //
-        table.offsetAddr = 8;
-        tableBase.offsetAddr = -1;
-        tableMemory.offsetAddr = 199;
-        self.memory = [];
-        //
-        function createCell(index, verifyFunc) {
-            var cell = row.insertCell(index);
-            cell.verifyEdit = (value, addr) => {
-                if (verifyFunc && !verifyFunc(value, addr)) {
-                    cell.classList.add('error');
-                } else {
-                    cell.classList.remove('error');
-                }
-            };
-            cell.classList.add('dat');
-        }
-        //
-        var addr = 0;
-        for (; addr < 9; addr++) {
-            var row = tableBase.insertRow(addr);
-            // Адрес
-            row.insertCell(0).innerText = addr;
-            // Binary
-            createCell(1, verifyBinary);
-            // Hex
-            createCell(2, verifyHex);
-            // Decemical
-            createCell(3, verifyDecemical);
-            setMemory(addr, 0);
-        }
-        //
-        for (; addr < 200; addr++) {
-            var row = table.insertRow(addr - 9);
-                // Адрес
-            row.insertCell(0).innerText = addr;
-                // Код команды
-            createCell(1, verifyOpCode);
-                // Мнемоника команды
-            createCell(2, verifyAsm);
-                // R
-            createCell(3, verifyR);
-                // B
-            createCell(4, verifyB);
-                // D
-            createCell(5, verifyD);
-			setMemory(addr, 0);
-        }
-        //
-        for (; addr < MEMORY_SIZE; addr++) {
-            row = tableMemory.insertRow(addr - 200);
-            row.insertCell(0).innerText = addr;
-            // Binary
-            createCell(1, verifyBinary);
-            // Hex
-            createCell(2, verifyHex);
-            // Decemical
-            createCell(3, verifyDecemical);
-            setMemory(addr, 0);
-        }
-        //
-        for (var i = 0; i < 8; i++) {
-            tableBase.rows[i].classList.add('base-addr');
-        }
-        table.addEventListener('mousedown', selectEdit);
-		tableBase.addEventListener('mousedown', selectEdit);
-        tableMemory.addEventListener('mousedown', selectEdit);
-        //
+        // Инициализация регистров
         self.regs = {
             R1: $$('#reg-R1'),
             R2: $$('#reg-R2'),
@@ -329,6 +260,83 @@ function Core() {
             C: $$('#flag-C'),
             E: $$('#flag-E')
         };
+        // Инициализация памяти
+        table = $$('tbody', $$('#commands-list'));
+        tableBase = $$('tbody', $$('#base-list'));
+        tableMemory = $$('tbody', $$('#memory-list'));
+        //
+        table.offsetAddr = 8;
+        tableBase.offsetAddr = -1;
+        tableMemory.offsetAddr = 199;
+        self.memory = [];
+        //
+        function createCell(index, verifyFunc) {
+            var cell = row.insertCell(index);
+            cell.verifyEdit = (value, addr) => {
+                if (verifyFunc && !verifyFunc(value, addr)) {
+                    cell.classList.add('error');
+                } else {
+                    cell.classList.remove('error');
+                }
+            };
+            cell.classList.add('dat');
+        }
+        //
+        var addr = 0;
+        for (; addr < 9; addr++) {
+            var row = tableBase.insertRow(addr);
+            // Адрес
+            row.insertCell(0).innerText = addr;
+            // Binary
+            createCell(1, verifyBinary);
+            // Hex
+            createCell(2, verifyHex);
+            // Decemical
+            createCell(3, verifyDecemical);
+            //Koments
+            createCell(4);
+            setMemory(addr, 0);
+        }
+        //
+        for (; addr < 200; addr++) {
+            var row = table.insertRow(addr - 9);
+                // Адрес
+            row.insertCell(0).innerText = addr;
+                // Код команды
+            createCell(1, verifyOpCode);
+                // Мнемоника команды
+            createCell(2, verifyAsm);
+                // R
+            createCell(3, verifyR);
+                // B
+            createCell(4, verifyB);
+                // D
+            createCell(5, verifyD);
+                //Koments
+            createCell(6);
+			setMemory(addr, 0);
+        }
+        //
+        for (; addr < MEMORY_SIZE; addr++) {
+            row = tableMemory.insertRow(addr - 200);
+            row.insertCell(0).innerText = addr;
+            // Binary
+            createCell(1, verifyBinary);
+            // Hex
+            createCell(2, verifyHex);
+            // Decemical
+            createCell(3, verifyDecemical);
+            //Koments
+            createCell(4);
+            setMemory(addr, 0);
+        }
+        //
+        for (var i = 0; i < 8; i++) {
+            tableBase.rows[i].classList.add('base-addr');
+        }
+        table.addEventListener('mousedown', selectEdit);
+		tableBase.addEventListener('mousedown', selectEdit);
+        tableMemory.addEventListener('mousedown', selectEdit);
         //
         self.reset();
     };
@@ -343,122 +351,122 @@ function Core() {
 
     var timer = null;
 
-    const COMMAND_EXEC = [
-        (R) => { // HLT
-            this.pause();
-            this.regs.SAK.set(this.regs.SAK.get() - 1);
-        },
-        (R) => { // RUN
-            setMemory(8, this.regs.SAK.get());
+const COMMAND_EXEC = [
+    (R) => { // HLT
+        this.pause();
+        this.regs.SAK.set(this.regs.SAK.get() - 1);
+    },
+    (R) => { // RUN
+        setMemory(8, this.regs.SAK.get());
+        self.regs.SAK.set(this.regs.RA.get());
+    },
+    (R) => { // RET
+        self.regs.SAK.set(this.memory[8]);
+    },
+    (R) => { // LDA
+        setACC(R, self.memory[self.regs.RA.get()]);
+    },
+    (R) => { // SDA
+        setMemory(self.regs.RA.get(), getACC((R)));
+    },
+    (R) => { // JES
+        if (this.flags.S.checked) {
             self.regs.SAK.set(this.regs.RA.get());
-        },
-        (R) => { // RET
-            self.regs.SAK.set(this.memory[8]);
-        },
-        (R) => { // LDA
-            setACC(R, self.memory[self.regs.RA.get()]);
-        },
-        (R) => { // SDA
-            setMemory(self.regs.RA.get(), getACC((R)));
-        },
-        (R) => { // JES
-            if (this.flags.S.checked) {
-                self.regs.SAK.set(this.regs.RA.get());
-            }
-        },
-        (R) => { // JEZ
-            if (this.flags.Z.checked) {
-                self.regs.SAK.set(this.regs.RA.get());
-            }
-        },
-        (R) => { // JMP
-            self.regs.SAK.set(this.regs.RA.get());
-        },
-        (R) => { // ADD
-            var res = getACC(R) + self.memory[self.regs.RA.get()];
-            this.flags.Z.checked = (res & 0xFFF) == 0;
-            this.flags.S.checked = (res & 0x800) != 0;
-            this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
-            setACC(R, res);
-        },
-        (R) => { // SUB
-            var res = getACC(R) - self.memory[self.regs.RA.get()];
-            this.flags.Z.checked = (res & 0xFFF) == 0;
-            this.flags.S.checked = (res & 0x800) != 0;
-            this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
-            setACC(R, res);
-        },
-        (R) => { // MUL
-            var res = getACC(R) * self.memory[self.regs.RA.get()];
-            this.flags.Z.checked = (res & 0xFFF) == 0;
-            this.flags.S.checked = (res & 0x800) != 0;
-            this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
-            setACC(R, res);
-        },
-        (R) => { // DIV
-            var op = self.memory[self.regs.RA.get()];
-            if (op != 0) {
-                var res = getACC(R) / op;
-                this.flags.Z.checked = (res & 0xFFF) == 0;
-                this.flags.S.checked = (res & 0x800) != 0;
-                this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
-                setACC(R, res);
-            } else {
-                console.log('Error! Divizion by zero!');
-            }
-        },
-        (R) => { // AND
-            var res = getACC(R) & self.memory[self.regs.RA.get()];
-            this.flags.Z.checked = (res & 0xFFF) == 0;
-            this.flags.S.checked = (res & 0x800) != 0;
-            setACC(R, res);
-        },
-        (R) => { // OR
-            var res = getACC(R) | self.memory[self.regs.RA.get()];
-            this.flags.Z.checked = (res & 0xFFF) == 0;
-            this.flags.S.checked = (res & 0x800) != 0;
-            setACC(R, res);
-        },
-        (R) => { // XOR
-            var res = getACC(R) ^ self.memory[self.regs.RA.get()];
-            this.flags.Z.checked = (res & 0xFFF) == 0;
-            this.flags.S.checked = (res & 0x800) != 0;
-            setACC(R, res);
-        },
-        (R) => { // INC
-            var addr = self.regs.RA.get();
-            var value = self.memory[addr];
-            value = (value + 1) & 0xFFF;
-            setMemory(addr, value);
-            if (this.flags.E.checked = (value == 0)) {
-                self.regs.SAK.set(self.regs.SAK.get() + 1);
-            }
-        },
-    ];
-
-    this.step = () => {
-        var SAK = self.regs.SAK.get();
-        var RK = self.memory[SAK];
-        self.regs.RK.set(RK);
-        var R = (RK & 0x10) != 0;
-        var B = (RK >> 5) & 7;
-        var D = (RK >> 8) & 0xF;
-        self.regs.RA.set(self.memory[B] + D);
-        self.regs.SAK.set(SAK + 1);
-        //
-        COMMAND_EXEC[RK & 0xF](R);
-    }
-
-    this.run = (delay) => {
-        if (timer == null) {
-            timer = setInterval(this.step, delay);
         }
-    };
+    },
+    (R) => { // JEZ
+        if (this.flags.Z.checked) {
+            self.regs.SAK.set(this.regs.RA.get());
+        }
+    },
+    (R) => { // JMP
+        self.regs.SAK.set(this.regs.RA.get());
+    },
+    (R) => { // ADD
+        var res = getACC(R) + self.memory[self.regs.RA.get()];
+        this.flags.Z.checked = (res & 0xFFF) == 0;
+        this.flags.S.checked = (res & 0x800) != 0;
+        this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
+        setACC(R, res);
+    },
+    (R) => { // SUB
+        var res = getACC(R) - self.memory[self.regs.RA.get()];
+        this.flags.Z.checked = (res & 0xFFF) == 0;
+        this.flags.S.checked = (res & 0x800) != 0;
+        this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
+        setACC(R, res);
+    },
+    (R) => { // MUL
+        var res = getACC(R) * self.memory[self.regs.RA.get()];
+        this.flags.Z.checked = (res & 0xFFF) == 0;
+        this.flags.S.checked = (res & 0x800) != 0;
+        this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
+        setACC(R, res);
+    },
+    (R) => { // DIV
+        var op = self.memory[self.regs.RA.get()];
+        if (op != 0) {
+            var res = getACC(R) / op;
+            this.flags.Z.checked = (res & 0xFFF) == 0;
+            this.flags.S.checked = (res & 0x800) != 0;
+            this.flags.C.checked = (res & (-1 ^ 0xFFF)) != 0;
+            setACC(R, res);
+        } else {
+            console.log('Error! Divizion by zero!');
+        }
+    },
+    (R) => { // AND
+        var res = getACC(R) & self.memory[self.regs.RA.get()];
+        this.flags.Z.checked = (res & 0xFFF) == 0;
+        this.flags.S.checked = (res & 0x800) != 0;
+        setACC(R, res);
+    },
+    (R) => { // OR
+        var res = getACC(R) | self.memory[self.regs.RA.get()];
+        this.flags.Z.checked = (res & 0xFFF) == 0;
+        this.flags.S.checked = (res & 0x800) != 0;
+        setACC(R, res);
+    },
+    (R) => { // XOR
+        var res = getACC(R) ^ self.memory[self.regs.RA.get()];
+        this.flags.Z.checked = (res & 0xFFF) == 0;
+        this.flags.S.checked = (res & 0x800) != 0;
+        setACC(R, res);
+    },
+    (R) => { // INC
+        var addr = self.regs.RA.get();
+        var value = self.memory[addr];
+        value = (value + 1) & 0xFFF;
+        setMemory(addr, value);
+        if (this.flags.E.checked = (value == 0)) {
+            self.regs.SAK.set(self.regs.SAK.get() + 1);
+        }
+    },
+];
 
-    this.pause = () => {
-        if (timer) clearInterval(timer);
-        timer = null;
+this.step = () => {
+    var SAK = self.regs.SAK.get();
+    var RK = self.memory[SAK];
+    self.regs.RK.set(RK);
+    var R = (RK & 0x10) != 0;
+    var B = (RK >> 5) & 7;
+    var D = (RK >> 8) & 0xF;
+    self.regs.RA.set(self.memory[B] + D);
+    self.regs.SAK.set(SAK + 1);
+    //
+    COMMAND_EXEC[RK & 0xF](R);
+}
+
+this.run = (delay) => {
+    if (timer == null) {
+        timer = setInterval(this.step, delay);
     }
+};
+
+this.pause = () => {
+    if (timer) clearInterval(timer);
+    timer = null;
+}
 
     this.upload = () => {
         var a = document.createElement("a");

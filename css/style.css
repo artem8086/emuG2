@@ -5,16 +5,16 @@
 
 
 .controls * {
-    font-size: 2.3vw;
+    font-size: 1.8vw;
 }
 
-@media only screen and (max-device-width: 480px) {
+@media only screen and (max-device-width: 590px) {
     * {
-        font-size: 6vw;
+        font-size: 4.vw;
     }
 
     .controls * {
-        font-size: 5.8vw;
+        font-size: 4.6vw;
     }
 }
 
@@ -84,7 +84,7 @@ table input[type="text"] {
 .main-container {
     display: inline-block;
     float: left;
-    margin: 3%;
+    margin: 2%;
 }
 
 .content-tabs {
@@ -137,11 +137,10 @@ table input[type="text"] {
 
 .observer {
     display: none;
-	width: 35vw;
-    top: 0px;
+	top: 0px;
     left: 0px;
     height: 60vw;
-    overflow: auto;
+    overflow-y: auto;
     border-style: dashed;
     border-color: #400;
     border-width: 1px;
@@ -153,7 +152,7 @@ table input[type="text"] {
 
 .controls {
     display: inline-block;
-    margin: 3%;
+    margin: 2%;
     padding: 4px;
 }
 
@@ -187,8 +186,7 @@ table.regs-table input[type="text"] {
 
 div.block-view {
     display: block;
-	width: 40vw;
-    padding: 3%;
+	padding: 3%;
     border-color: #000000;
     border-width: 2px;
     border-style: solid;
